@@ -34,6 +34,13 @@ pub fn fetch_opcode(self: *Self) u8 {
 }
 
 pub fn read_opcode(self: *Self, address: u8) u8 {
+    if (address >= max_mem) {
+        _ = std.io.getStdOut().write(
+            "Address out of bounds (64 KiB) max.",
+        ) catch unreachable;
+        std.os.exit(1);
+    }
+
     const data = self.data[address];
     self.cpu.cycles -= 1;
 
