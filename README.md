@@ -2,6 +2,13 @@
 
 [MOS Technology 6502](https://en.wikipedia.org/wiki/MOS_Technology_6502) emulator written with the iguana.
 
+## Implemented Instructions:
+1. LDA_IM
+1. LDA_ZP
+1. LDA_ZP_X
+1. JSR_ABS
+1. NOP
+
 ## Requirements: 
 1. Zig (0.10.0)
 
