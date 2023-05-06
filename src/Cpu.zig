@@ -31,21 +31,25 @@ bit_V: u1 = undefined, // Overflow
 bit_N: u1 = undefined, // Negative
 
 pub fn tick(self: *Self) void {
-    self.cycles -= 1;
+    comptime self.cycles -= 1;
 }
 
 pub fn reset(self: *Self, program_counter_addr: u16) void {
-    self.program_counter = program_counter_addr;
-    self.stack_pointer = 0x0100;
-    self.reg_A = 0;
-    self.reg_X = 0;
-    self.reg_Y = 0;
+    comptime {
+        self.program_counter = program_counter_addr;
+        self.stack_pointer = 0x0100;
+        self.reg_A = 0;
+        self.reg_X = 0;
+        self.reg_Y = 0;
+    }
 }
 
 /// Set the required bits
 fn LDA_set_bits(self: *Self) void {
-    self.bit_Z = @boolToInt(self.reg_A == 0);
-    self.bit_N = @truncate(u1, self.reg_A & (1 << 7));
+    comptime {
+        self.bit_Z = @boolToInt(self.reg_A == 0);
+        self.bit_N = @truncate(u1, self.reg_A & (1 << 7));
+    }
 }
 
 pub fn print_internal_state(self: *Self) void {
@@ -91,14 +95,16 @@ pub fn execute(self: *Self, cycles: u32) void {
                 self.LDA_set_bits();
             },
             OpCodes.JSR_ABS => {
+                // Stack pointer needs to be incremented here.
                 const address = self.memory.fetch_opcode(u16);
                 self.memory.write_opcode(self.program_counter - 1, self.stack_pointer);
+                self.stack_pointer += 1;
                 self.program_counter = address;
 
                 self.tick();
             },
             OpCodes.NO_OP => {
-                // No-op
+                // No-Op
             },
             else => {
                 _ = std.io.getStdOut().writer().print(

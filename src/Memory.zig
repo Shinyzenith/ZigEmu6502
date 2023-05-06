@@ -17,8 +17,10 @@ data: [max_mem]u8 = undefined,
 cpu: *Cpu = undefined,
 
 pub fn reset(self: *Self) void {
-    self.data = [_]u8{@enumToInt(OpCodes.NO_OP)} ** max_mem;
-    self.cpu = @fieldParentPtr(Cpu, "memory", self);
+    comptime {
+        self.data = [_]u8{@enumToInt(OpCodes.NO_OP)} ** max_mem;
+        self.cpu = @fieldParentPtr(Cpu, "memory", self);
+    }
 }
 
 /// Depletes 1 cycle for u8, 2 cycles for u16
@@ -69,8 +71,10 @@ pub fn write_opcode(
     value: u16,
     address: u32,
 ) void {
-    self.data[address] = @intCast(u8, value & 0xFF);
-    self.data[address + 1] = @intCast(u8, (value >> 8));
+    comptime {
+        self.data[address] = @intCast(u8, value & 0xFF);
+        self.data[address + 1] = @intCast(u8, (value >> 8));
+    }
 
     // Tick twice.
     comptime var i = 1;
