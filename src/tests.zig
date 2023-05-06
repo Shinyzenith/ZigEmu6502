@@ -14,12 +14,12 @@ const initial_address = 0xFFFC;
 var gpa = std.heap.GeneralPurposeAllocator(.{}){};
 const allocator = gpa.allocator();
 
-test "Creating the CPU" {
+test "CPU_INIT" {
     var cpu = try init_cpu();
     try testing.expectEqual(cpu.*.program_counter, initial_address);
 }
 
-test "JSR Absolute" {
+test "OpCode_JSR_ABS" {
     var cpu = try init_cpu();
 
     // Required Addresses
