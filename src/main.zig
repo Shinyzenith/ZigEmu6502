@@ -14,17 +14,21 @@ const OpCodes = @import("OpCodes.zig").OpCodes;
 
 pub fn main() !void {
     var cpu: Cpu = undefined;
+    const initial_address = 0xFFFC;
 
-    cpu.reset(0xFFFC);
+    cpu.reset(initial_address);
     cpu.memory.reset();
 
-    // Start - Little inline program
-    cpu.memory.data[0xFFFC] = @enumToInt(OpCodes.JSR_ABS);
-    cpu.memory.data[0xFFFD] = 0x42;
-    cpu.memory.data[0xFFFE] = 0x42;
-    cpu.memory.data[0x4242] = @enumToInt(OpCodes.LDA_IM);
-    cpu.memory.data[0x4243] = 0x84;
-    // End - Little inline program
+    const jump_addr = 0x4243;
+    const jump_addr_lsb = 0x43;
+    const jump_addr_msb = 0x42;
+    const data = 0x84;
+
+    cpu.memory.data[initial_address] = @enumToInt(OpCodes.JSR_ABS);
+    cpu.memory.data[initial_address + 1] = jump_addr_lsb;
+    cpu.memory.data[initial_address + 2] = jump_addr_msb;
+    cpu.memory.data[jump_addr] = @enumToInt(OpCodes.LDA_IM);
+    cpu.memory.data[jump_addr + 1] = data;
 
     cpu.execute(9);
     cpu.print_internal_state();
