@@ -103,8 +103,8 @@ pub fn execute(self: *Self, cycles: u32) void {
 
                 self.tick();
             },
-            OpCodes.NO_OP => {
-                // No-Op
+            OpCodes.NOP => {
+                self.program_counter += 1;
             },
             else => {
                 _ = std.io.getStdOut().writer().print(

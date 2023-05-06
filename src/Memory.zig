@@ -18,7 +18,7 @@ cpu: *Cpu = undefined,
 
 pub fn reset(self: *Self) void {
     comptime {
-        self.data = [_]u8{@enumToInt(OpCodes.NO_OP)} ** max_mem;
+        self.data = [_]u8{@enumToInt(OpCodes.NOP)} ** max_mem;
         self.cpu = @fieldParentPtr(Cpu, "memory", self);
     }
 }

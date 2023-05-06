@@ -21,5 +21,5 @@ pub const OpCodes = enum(u16) {
     JMP_IND = 0x6C,
     JSR_ABS = 0x20,
 
-    NO_OP = 0xEA,
+    NOP = 0xEA,
 };
