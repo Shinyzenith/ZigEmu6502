@@ -6,7 +6,8 @@
 // Copyright:	(C) 2023, Aakash Sen Sharma & Contributors
 
 const Self = @This();
-pub const codes = enum(u16) {
+
+pub const OpCodes = enum(u16) {
     LDA_IM = 0xA9,
     LDA_ZP = 0xA5,
     LDA_ZP_X = 0xB5,
@@ -15,4 +16,10 @@ pub const codes = enum(u16) {
     LDA_ABS_Y = 0xB9,
     LDA_IND_X = 0xA1,
     LDA_IND_Y = 0xB1,
+
+    JMP_ABS = 0x4C,
+    JMP_IND = 0x6C,
+    JSR_ABS = 0x20,
+
+    NO_OP = 0xEA,
 };

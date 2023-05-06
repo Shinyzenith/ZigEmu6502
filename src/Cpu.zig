@@ -9,7 +9,7 @@ const Self = @This();
 const std = @import("std");
 
 const Memory = @import("Memory.zig");
-const OpCodes = @import("OpCodes.zig");
+const OpCodes = @import("OpCodes.zig").OpCodes;
 
 program_counter: u16 = undefined,
 stack_pointer: u16 = undefined,
@@ -30,6 +30,10 @@ bit_U: u1 = undefined, // Unused
 bit_V: u1 = undefined, // Overflow
 bit_N: u1 = undefined, // Negative
 
+pub fn tick(self: *Self) void {
+    self.cycles -= 1;
+}
+
 pub fn reset(self: *Self, program_counter_addr: u16) void {
     self.program_counter = program_counter_addr;
     self.stack_pointer = 0x0100;
@@ -38,27 +42,10 @@ pub fn reset(self: *Self, program_counter_addr: u16) void {
     self.reg_Y = 0;
 }
 
-pub fn execute(self: *Self, cycles: u32) void {
-    self.cycles = cycles;
-
-    while (self.cycles > 0) {
-        const op_code = self.memory.fetch_opcode();
-        switch (@intToEnum(OpCodes.codes, op_code)) {
-            OpCodes.codes.LDA_IM => {
-                const val = self.memory.fetch_opcode();
-                self.reg_A = val;
-
-                self.LDA_set_bits();
-            },
-            OpCodes.codes.LDA_ZP => {
-                const address = self.memory.fetch_opcode();
-                self.reg_A = self.memory.read_opcode(address);
-
-                self.LDA_set_bits();
-            },
-            else => std.debug.print("OpCode: {d} not handled\n", .{op_code}),
-        }
-    }
+/// Set the required bits
+fn LDA_set_bits(self: *Self) void {
+    self.bit_Z = @boolToInt(self.reg_A == 0);
+    self.bit_N = @truncate(u1, self.reg_A & (1 << 7));
 }
 
 pub fn print_internal_state(self: *Self) void {
@@ -71,8 +58,55 @@ pub fn print_internal_state(self: *Self) void {
     ) catch unreachable;
 }
 
-/// Set the required bits
-fn LDA_set_bits(self: *Self) void {
-    self.bit_Z = @boolToInt(self.reg_A == 0);
-    self.bit_N = @truncate(u1, self.reg_A & (1 << 7));
+pub fn execute(self: *Self, cycles: u32) void {
+    self.cycles = cycles;
+
+    while (self.cycles > 0) {
+        const op_code = self.memory.fetch_opcode(u8);
+        switch (@intToEnum(OpCodes, op_code)) {
+            OpCodes.LDA_IM => {
+                const val = self.memory.fetch_opcode(u8);
+                self.reg_A = val;
+                self.tick();
+
+                self.LDA_set_bits();
+            },
+            OpCodes.LDA_ZP => {
+                const address = self.memory.fetch_opcode(u8);
+                self.reg_A = self.memory.read_opcode(address);
+                self.tick();
+
+                self.LDA_set_bits();
+            },
+            OpCodes.LDA_ZP_X => {
+                var address = self.memory.fetch_opcode(u8);
+                // TODO: Check this overflow logic.
+                address +%= self.reg_X;
+                address &= 0xFF;
+
+                self.tick();
+
+                self.reg_A = self.memory.read_opcode(address);
+
+                self.LDA_set_bits();
+            },
+            OpCodes.JSR_ABS => {
+                const address = self.memory.fetch_opcode(u16);
+                self.memory.write_opcode(self.program_counter - 1, self.stack_pointer);
+                self.program_counter = address;
+
+                self.tick();
+            },
+            OpCodes.NO_OP => {
+                // No-op
+            },
+            else => {
+                _ = std.io.getStdOut().writer().print(
+                    "Opcode {d} not handled",
+                    .{op_code},
+                ) catch unreachable;
+                std.os.exit(1);
+            },
+        }
+    }
 }
