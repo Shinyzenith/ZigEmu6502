@@ -1,0 +1,29 @@
+name: Build ZigEmu6502
+
+on: [push, pull_request]
+jobs:
+    build:
+        name: "Build ZigEmu6502"
+        runs-on: ubuntu-latest
+        steps:
+            - name: Installing zig
+              run: |
+                  ZIG_VERSION=0.10.0
+
+                  wget -nv https://ziglang.org/download/$ZIG_VERSION/zig-linux-x86_64-$ZIG_VERSION.tar.xz
+                  tar -xvf zig-linux-x86_64-$ZIG_VERSION.tar.xz
+                  sudo mv ./zig-linux-x86_64-$ZIG_VERSION/zig /usr/bin
+                  sudo mv ./zig-linux-x86_64-$ZIG_VERSION/lib /usr/lib/zig
+
+            - name: Checkout ZigEmu6502
+              uses: actions/checkout@v3
+              with:
+                  submodules: true
+
+            - name: Build ZigEmu6502
+              run: |
+                  zig build
+
+            - name: Executing tests
+              run: |
+                  zig build test
