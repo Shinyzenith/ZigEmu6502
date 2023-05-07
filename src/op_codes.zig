@@ -5,8 +5,6 @@
 // Created by:	Aakash Sen Sharma, May 2023
 // Copyright:	(C) 2023, Aakash Sen Sharma & Contributors
 
-const Self = @This();
-
 pub const OpCodes = enum(u16) {
     LDA_IM = 0xA9,
     LDA_ZP = 0xA5,

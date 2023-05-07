@@ -7,7 +7,7 @@
 
 const std = @import("std");
 const Cpu = @import("Cpu.zig");
-const OpCodes = @import("OpCodes.zig").OpCodes;
+const OpCodes = @import("op_codes.zig").OpCodes;
 const testing = std.testing;
 
 const initial_address = 0xFFFC;

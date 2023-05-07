@@ -9,7 +9,7 @@ const Self = @This();
 const std = @import("std");
 
 const Memory = @import("Memory.zig");
-const OpCodes = @import("OpCodes.zig").OpCodes;
+const OpCodes = @import("op_codes.zig").OpCodes;
 
 program_counter: u16 = undefined,
 stack_pointer: u16 = undefined,

@@ -7,10 +7,9 @@
 
 const Self = @This();
 const std = @import("std");
-const builtin = @import("builtin");
 const mem = std.mem;
 const Cpu = @import("Cpu.zig");
-const OpCodes = @import("OpCodes.zig").OpCodes;
+const OpCodes = @import("op_codes.zig").OpCodes;
 const max_mem: usize = 1024 * 64; // 64 KiB of memory
 
 data: [max_mem]u8 = undefined,

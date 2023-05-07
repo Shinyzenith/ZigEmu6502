@@ -5,12 +5,8 @@
 // Created by:	Aakash Sen Sharma, May 2023
 // Copyright:	(C) 2023, Aakash Sen Sharma & Contributors
 
-const Self = @This();
-const std = @import("std");
-
 const Cpu = @import("Cpu.zig");
-const Memory = @import("Memory.zig");
-const OpCodes = @import("OpCodes.zig").OpCodes;
+const OpCodes = @import("op_codes.zig").OpCodes;
 
 pub fn main() !void {
     var cpu: Cpu = undefined;
