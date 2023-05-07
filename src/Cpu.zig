@@ -12,7 +12,7 @@ const Memory = @import("Memory.zig");
 const OpCodes = @import("op_codes.zig").OpCodes;
 
 program_counter: u16 = undefined,
-stack_pointer: u16 = undefined,
+stack_pointer: u8 = undefined,
 cycles: u32 = undefined,
 
 memory: Memory = undefined,
@@ -37,7 +37,7 @@ pub fn tick(self: *Self) void {
 pub fn reset(self: *Self, program_counter_addr: u16) void {
     comptime {
         self.program_counter = program_counter_addr;
-        self.stack_pointer = 0x0100;
+        self.stack_pointer = 0x0;
         self.reg_A = 0;
         self.reg_X = 0;
         self.reg_Y = 0;
