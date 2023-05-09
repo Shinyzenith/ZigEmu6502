@@ -37,7 +37,7 @@ pub fn fetch_opcode(self: *Self, comptime T: type) T {
     self.cpu.tick();
 
     if (T == u16) {
-        data |= (@intCast(u16, self.data[self.cpu.program_counter]) << 8);
+        data |= (@intCast(T, self.data[self.cpu.program_counter]) << 8);
         data = mem.littleToNative(T, data);
 
         self.cpu.program_counter += 1;
