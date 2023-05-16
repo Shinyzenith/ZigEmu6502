@@ -71,27 +71,23 @@ pub fn execute(self: *Self, cycles: u32) void {
             OpCodes.LDA_IM => {
                 const val = self.memory.fetch_opcode(u8);
                 self.reg_A = val;
-                self.tick();
 
                 self.LDA_set_bits();
             },
             OpCodes.LDA_ZP => {
                 const address = self.memory.fetch_opcode(u8);
                 self.reg_A = self.memory.read_opcode(address);
-                self.tick();
 
                 self.LDA_set_bits();
             },
             OpCodes.LDA_ZP_X => {
                 var address = self.memory.fetch_opcode(u8);
-                // TODO: Check this overflow logic.
                 address +%= self.reg_X;
                 address &= 0xFF;
 
-                self.tick();
-
                 self.reg_A = self.memory.read_opcode(address);
 
+                self.tick();
                 self.LDA_set_bits();
             },
             OpCodes.JSR_ABS => {
@@ -100,11 +96,10 @@ pub fn execute(self: *Self, cycles: u32) void {
                 self.memory.write_opcode(self.program_counter - 1, self.stack_pointer);
                 self.stack_pointer += 1;
                 self.program_counter = address;
-
-                self.tick();
             },
             OpCodes.NOP => {
                 self.program_counter += 1;
+                self.tick();
             },
             else => {
                 _ = std.io.getStdOut().writer().print(
