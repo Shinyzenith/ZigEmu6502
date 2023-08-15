@@ -16,11 +16,9 @@ data: [max_mem]u8 = undefined,
 cpu: *Cpu = undefined,
 
 pub fn reset(self: *Self) void {
-    comptime {
-        // Fill the entire memory with NOP (no-op) opcode.
-        @memset(&self.data, @enumToInt(OpCodes.NOP), max_mem);
-        self.cpu = @fieldParentPtr(Cpu, "memory", self);
-    }
+    // Fill the entire memory with NOP (no-op) opcode.
+    @memset(&self.data, @intFromEnum(OpCodes.NOP));
+    self.cpu = @fieldParentPtr(Cpu, "memory", self);
 }
 
 /// Depletes 1 cycle for u8, 2 cycles for u16
@@ -38,7 +36,7 @@ pub fn fetch_opcode(self: *Self, comptime T: type) T {
     self.cpu.tick();
 
     if (T == u16) {
-        data |= (@intCast(T, self.data[self.cpu.program_counter]) << 8);
+        data |= (@as(T, @intCast(self.data[self.cpu.program_counter])) << 8);
         data = mem.littleToNative(T, data);
 
         self.cpu.program_counter += 1;
@@ -71,10 +69,8 @@ pub fn write_opcode(
     value: u16,
     address: u32,
 ) void {
-    comptime {
-        self.data[address] = @intCast(u8, value & 0xFF);
-        self.data[address + 1] = @intCast(u8, (value >> 8));
-    }
+    self.data[address] = @as(u8, @intCast(value & 0xFF));
+    self.data[address + 1] = @as(u8, @intCast((value >> 8)));
 
     // Tick twice.
     comptime var i = 1;

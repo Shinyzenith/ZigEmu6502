@@ -33,12 +33,12 @@ test "OpCode_JSR_ABS" {
     const jump_addr_msb = 0x42;
 
     // Jump Subroutine Absolute Instruction
-    cpu.memory.data[initial_address] = @enumToInt(OpCodes.JSR_ABS);
+    cpu.memory.data[initial_address] = @intFromEnum(OpCodes.JSR_ABS);
     cpu.memory.data[initial_address + 1] = jump_addr_lsb;
     cpu.memory.data[initial_address + 2] = jump_addr_msb;
 
     // Load Accumulator Immediate Instruction
-    cpu.memory.data[jump_addr] = @enumToInt(OpCodes.LDA_IM);
+    cpu.memory.data[jump_addr] = @intFromEnum(OpCodes.LDA_IM);
     cpu.memory.data[jump_addr + 1] = data;
 
     cpu.execute(cycles);
@@ -55,7 +55,7 @@ test "OpCode_LDA_IM" {
     const cycles = 2;
     const data = 0x84;
 
-    cpu.memory.data[initial_address] = @enumToInt(OpCodes.LDA_IM);
+    cpu.memory.data[initial_address] = @intFromEnum(OpCodes.LDA_IM);
     cpu.memory.data[initial_address + 1] = data;
 
     cpu.execute(cycles);
@@ -73,7 +73,7 @@ test "OpCode_LDA_ZP" {
     const address = 0x42;
     const data = 0x84;
 
-    cpu.memory.data[initial_address] = @enumToInt(OpCodes.LDA_ZP);
+    cpu.memory.data[initial_address] = @intFromEnum(OpCodes.LDA_ZP);
     cpu.memory.data[initial_address + 1] = address;
     cpu.memory.data[address] = data;
 
@@ -95,7 +95,7 @@ test "OpCode_LDA_ZP_X_no_overflow" {
     const address = 0x42;
     const data = 0x84;
 
-    cpu.memory.data[initial_address] = @enumToInt(OpCodes.LDA_ZP_X);
+    cpu.memory.data[initial_address] = @intFromEnum(OpCodes.LDA_ZP_X);
     cpu.memory.data[initial_address + 1] = address;
     cpu.memory.data[address + cpu.reg_X] = data;
 
@@ -119,7 +119,7 @@ test "OpCode_LDA_ZP_X_overflow" {
     const address = 0x80;
     const overflow_addr = 0x7F;
 
-    cpu.memory.data[initial_address] = @enumToInt(OpCodes.LDA_ZP_X);
+    cpu.memory.data[initial_address] = @intFromEnum(OpCodes.LDA_ZP_X);
     cpu.memory.data[initial_address + 1] = address;
     cpu.memory.data[overflow_addr] = data;
 
@@ -136,7 +136,7 @@ test "OpCode_NOP" {
 
     const cycles = 2;
 
-    cpu.memory.data[initial_address] = @enumToInt(OpCodes.NOP);
+    cpu.memory.data[initial_address] = @intFromEnum(OpCodes.NOP);
     cpu.execute(cycles);
 
     // One PC increment due to fetch_opcode, next one due to NOP

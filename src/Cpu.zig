@@ -31,25 +31,21 @@ bit_V: u1 = undefined, // Overflow
 bit_N: u1 = undefined, // Negative
 
 pub fn tick(self: *Self) void {
-    comptime self.cycles -= 1;
+    self.cycles -= 1;
 }
 
 pub fn reset(self: *Self, program_counter_addr: u16) void {
-    comptime {
-        self.program_counter = program_counter_addr;
-        self.stack_pointer = 0x0;
-        self.reg_A = 0;
-        self.reg_X = 0;
-        self.reg_Y = 0;
-    }
+    self.program_counter = program_counter_addr;
+    self.stack_pointer = 0x0;
+    self.reg_A = 0;
+    self.reg_X = 0;
+    self.reg_Y = 0;
 }
 
 /// Set the required bits
 fn LDA_set_bits(self: *Self) void {
-    comptime {
-        self.bit_Z = @boolToInt(self.reg_A == 0);
-        self.bit_N = @truncate(u1, self.reg_A & (1 << 7));
-    }
+    self.bit_Z = @intFromBool(self.reg_A == 0);
+    self.bit_N = @as(u1, @truncate(self.reg_A & (1 << 7)));
 }
 
 pub fn print_internal_state(self: *Self) void {
@@ -67,7 +63,7 @@ pub fn execute(self: *Self, cycles: u32) void {
 
     while (self.cycles > 0) {
         const op_code = self.memory.fetch_opcode(u8);
-        switch (@intToEnum(OpCodes, op_code)) {
+        switch (@as(OpCodes, @enumFromInt(op_code))) {
             OpCodes.LDA_IM => {
                 const val = self.memory.fetch_opcode(u8);
                 self.reg_A = val;
