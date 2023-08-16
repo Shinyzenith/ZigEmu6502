@@ -189,9 +189,8 @@ test "OpCode_LDA_IM-Can_Set_Zero_Bit" {
     cpu.execute(cycles);
 
     try testing.expectEqual(cpu.cycles, 0);
-    try testing.expectEqual(cpu.reg_A, 0x0);
-    try testing.expectEqual(cpu.bit_Z, 1);
-    try testing.expectEqual(cpu.bit_N, 0);
+    try testing.expectEqual(cpu.reg_A, data);
+    try test_bits(cpu, 0, 0, 0, 0, 0, 0, 1);
 }
 
 test "OpCode_LDA_ABS" {
