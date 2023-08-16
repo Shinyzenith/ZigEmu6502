@@ -15,7 +15,7 @@
 1. NOP
 
 ## Requirements: 
-1. Zig (0.10.0)
+1. Zig (0.11.0)
 
 ## Building: 
 ```console
