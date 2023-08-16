@@ -13,7 +13,7 @@ const OpCodes = @import("op_codes.zig").OpCodes;
 
 program_counter: u16 = undefined,
 stack_pointer: u8 = undefined,
-cycles: u32 = undefined,
+cycles: i32 = undefined,
 
 memory: Memory = undefined,
 
@@ -58,38 +58,86 @@ pub fn print_internal_state(self: *Self) void {
     ) catch unreachable;
 }
 
-pub fn execute(self: *Self, cycles: u32) void {
+pub fn execute(self: *Self, cycles: i32) void {
     self.cycles = cycles;
 
     while (self.cycles > 0) {
-        const op_code = self.memory.fetch_opcode(u8);
+        const op_code = self.memory.fetch_data(u8);
         switch (@as(OpCodes, @enumFromInt(op_code))) {
             OpCodes.LDA_IM => {
-                const val = self.memory.fetch_opcode(u8);
+                const val = self.memory.fetch_data(u8);
                 self.reg_A = val;
 
                 self.LDA_set_bits();
             },
+            OpCodes.LDA_ABS => {
+                const address = self.memory.fetch_data(u16);
+                self.reg_A = self.memory.read_data(u8, address);
+
+                self.LDA_set_bits();
+            },
+            OpCodes.LDA_ABS_X => {
+                var address = self.memory.fetch_data(u16);
+                address += self.reg_X;
+
+                if (self.reg_X >= 0xFF) {
+                    self.tick(); // Page boundary cross cycle!
+                }
+
+                self.reg_A = self.memory.read_data(u8, address);
+            },
+            OpCodes.LDA_IND_X => {
+                var zero_page_addr = self.memory.fetch_data(u8);
+                zero_page_addr += self.reg_X;
+
+                self.tick(); // Adding the reg_X value consumes a cycle :)
+
+                const effective_adddr = self.memory.read_data(u16, zero_page_addr);
+
+                self.reg_A = self.memory.read_data(u8, effective_adddr);
+            },
+            OpCodes.LDA_IND_Y => {
+                const zero_page_addr = self.memory.fetch_data(u8);
+                var effective_addr = self.memory.read_data(u16, zero_page_addr);
+
+                effective_addr += self.reg_Y;
+
+                if (self.reg_Y >= 0xFF) {
+                    self.tick(); // Page boundary cross cycle!
+                }
+
+                self.reg_A = self.memory.read_data(u8, effective_addr);
+            },
+            OpCodes.LDA_ABS_Y => {
+                var address = self.memory.fetch_data(u16);
+                address += self.reg_Y;
+
+                if (self.reg_Y >= 0xFF) {
+                    self.tick(); // Page boundary cross cycle!
+                }
+
+                self.reg_A = self.memory.read_data(u8, address);
+            },
             OpCodes.LDA_ZP => {
-                const address = self.memory.fetch_opcode(u8);
-                self.reg_A = self.memory.read_opcode(address);
+                const address = self.memory.fetch_data(u8);
+                self.reg_A = self.memory.read_data(u8, address);
 
                 self.LDA_set_bits();
             },
             OpCodes.LDA_ZP_X => {
-                var address = self.memory.fetch_opcode(u8);
+                var address = self.memory.fetch_data(u8);
                 address +%= self.reg_X;
                 address &= 0xFF;
 
-                self.reg_A = self.memory.read_opcode(address);
+                self.reg_A = self.memory.read_data(u8, address);
 
                 self.tick();
                 self.LDA_set_bits();
             },
             OpCodes.JSR_ABS => {
                 // Stack pointer needs to be incremented here.
-                const address = self.memory.fetch_opcode(u16);
-                self.memory.write_opcode(self.program_counter - 1, self.stack_pointer);
+                const address = self.memory.fetch_data(u16);
+                self.memory.write_data(self.program_counter - 1, self.stack_pointer);
                 self.stack_pointer += 1;
                 self.program_counter = address;
             },
@@ -98,11 +146,7 @@ pub fn execute(self: *Self, cycles: u32) void {
                 self.tick();
             },
             else => {
-                _ = std.io.getStdOut().writer().print(
-                    "Opcode {d} not handled",
-                    .{op_code},
-                ) catch unreachable;
-                std.os.exit(1);
+                @panic("Opcode not handled");
             },
         }
     }

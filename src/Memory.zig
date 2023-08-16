@@ -22,7 +22,7 @@ pub fn reset(self: *Self) void {
 }
 
 /// Depletes 1 cycle for u8, 2 cycles for u16
-pub fn fetch_opcode(self: *Self, comptime T: type) T {
+pub fn fetch_data(self: *Self, comptime T: type) T {
     if (self.cpu.program_counter >= max_mem) {
         _ = std.io.getStdOut().write(
             "Attempt to overflow the program counter past 64 KiB.",
@@ -37,7 +37,7 @@ pub fn fetch_opcode(self: *Self, comptime T: type) T {
 
     if (T == u16) {
         data |= (@as(T, @intCast(self.data[self.cpu.program_counter])) << 8);
-        data = mem.littleToNative(T, data);
+        data = mem.littleToNative(T, data); //NOTE: Do we need to do this? What if the host system in big endian. That should crash as 6502 is little endian.
 
         self.cpu.program_counter += 1;
         self.cpu.tick();
@@ -52,7 +52,18 @@ pub fn fetch_opcode(self: *Self, comptime T: type) T {
     return data;
 }
 
-pub fn read_opcode(self: *Self, address: u8) u8 {
+pub fn read_data(self: *Self, comptime T: type, address: u16) T {
+    if (T == u8) {
+        return self._read_data(address);
+    } else if (T == u16) {
+        var lsb = self._read_data(address);
+        const msb = self._read_data(address + 1);
+
+        return lsb | (@as(T, @intCast(msb)) << 8);
+    }
+}
+
+fn _read_data(self: *Self, address: u16) u8 {
     if (address >= max_mem) {
         _ = std.io.getStdOut().write("Address out of bounds (64 KiB) max.") catch unreachable;
         std.os.exit(1);
@@ -64,7 +75,7 @@ pub fn read_opcode(self: *Self, address: u8) u8 {
     return data;
 }
 
-pub fn write_opcode(
+pub fn write_data(
     self: *Self,
     value: u16,
     address: u32,
